@@ -1,9 +1,13 @@
 use std::os::windows;
+use bevy::render::view::{ExtractedWindows, WindowSurfaces};
+use bevy::window::Window;
+
+use bevy::input::mouse::MouseMotion;
+use bevy::input::Input;
 
 use bevy::prelude::Component;
 use bevy::{prelude::*, transform::commands};
 use bevy_flycam::prelude::*;
-
 mod voxel;
 
 
@@ -12,6 +16,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(PlayerPlugin)
         .add_systems(Startup, setup)
+        .add_systems(Update, cursor_follow_system)
         .run();
 }
 
@@ -41,9 +46,8 @@ fn setup(
     });
 
     //Add cursor
-    #[derive(Component)]
-    struct Cursor;
-    let cursor_texture_handle = asset_server.load("src/assets/cursor.png");
+   
+    let cursor_texture_handle = asset_server.load("cursor.png");
 
     commands.spawn(SpriteBundle {
         texture: cursor_texture_handle.into(),
@@ -51,4 +55,21 @@ fn setup(
     })
     .insert(Cursor);
     
+}
+
+#[derive(Component)]
+struct Cursor;
+
+fn cursor_follow_system(
+    mut cursor_query: Query<&mut Transform, With<Cursor>>,
+    windows: Query<&Window>,
+) {
+    for window in windows.iter() {
+        let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+        let cursor_position = window_size / 2.0;
+
+        for mut transform in cursor_query.iter_mut() {
+            transform.translation = Vec3::new(cursor_position.x, cursor_position.y, 0.0);
+        }
+    }
 }

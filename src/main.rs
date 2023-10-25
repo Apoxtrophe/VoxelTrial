@@ -1,5 +1,6 @@
 use std::os::windows;
 
+use bevy::prelude::Component;
 use bevy::{prelude::*, transform::commands};
 use bevy_flycam::prelude::*;
 
@@ -19,6 +20,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut asset_server: Res<AssetServer>
 ) {
     // cube
     commands.spawn(PbrBundle {
@@ -37,5 +39,16 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
+
+    //Add cursor
+    #[derive(Component)]
+    struct Cursor;
+    let cursor_texture_handle = asset_server.load("src/assets/cursor.png");
+
+    commands.spawn(SpriteBundle {
+        texture: cursor_texture_handle.into(),
+        ..Default::default()
+    })
+    .insert(Cursor);
     
 }
